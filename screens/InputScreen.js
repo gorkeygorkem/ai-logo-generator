@@ -7,9 +7,12 @@ import {
   StyleSheet,
   ScrollView,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const stylesList = [
   { id: 'no-style', label: 'No Style', icon: 'filter-none' },
@@ -24,11 +27,28 @@ export default function InputScreen({ navigation }) {
   const [status, setStatus] = useState('idle'); // idle | processing | done
   const [timerId, setTimerId] = useState(null);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     setStatus('processing');
+    console.log('📤 Attempting to write to Firestore...');
+
+    try {
+      if (prompt.length > 0) {
+        // FOR TESTING
+        let res = await addDoc(collection(db, 'generations'), {
+          prompt,
+          style: selectedStyle,
+          createdAt: serverTimestamp(),
+        });
+        console.log('saved ,', res);
+      } else {
+        console.log('skipped');
+      }
+    } catch (error) {
+      console.log(error);
+    }
 
     const delay =
-      /*  Math.floor(Math.random() * (60 - 30 + 1) + 30)  */ 2 * 1000;
+      /*  Math.floor(Math.random() * (60 - 30 + 1) + 30)  */ 2 * 1000; // FOR TESTING
     const id = setTimeout(() => {
       setStatus('done');
     }, delay);
@@ -69,7 +89,7 @@ export default function InputScreen({ navigation }) {
         <View style={styles.chipContainer}>
           <View style={styles.chipIcon}>
             {isProcessing ? (
-              <MaterialIcons name="hourglass-top" size={18} color="#fff" />
+              <ActivityIndicator size="small" color="#fff" />
             ) : (
               <Ionicons name="checkmark-circle" size={18} color="#81c784" />
             )}
@@ -79,7 +99,7 @@ export default function InputScreen({ navigation }) {
               {isProcessing ? 'Creating Your Design…' : 'Your Design is Ready!'}
             </Text>
             <Text style={styles.chipSub}>
-              {isProcessing ? 'Ready in 2 minutes' : 'Tap to see it.'}
+              {isProcessing ? 'Ready in 2 seconds' : 'Tap to see it.'}
             </Text>
           </View>
         </View>
