@@ -32,7 +32,7 @@ A mobile app that allows users to describe their dream logo, choose a style, and
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/your-username/ai-logo-generator.git
+git clone https://github.com/gorkeygorkem/ai-logo-generator.git
 cd ai-logo-generator
 npm install
 ```
