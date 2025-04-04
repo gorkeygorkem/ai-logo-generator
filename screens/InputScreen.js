@@ -12,7 +12,13 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { db } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  doc,
+  onSnapshot,
+  serverTimestamp,
+} from 'firebase/firestore';
 
 const stylesList = [
   { id: 'no-style', label: 'No Style', icon: 'filter-none' },
@@ -26,6 +32,20 @@ export default function InputScreen({ navigation }) {
   const [selectedStyle, setSelectedStyle] = useState('no-style');
   const [status, setStatus] = useState('idle'); // idle | processing | done
   const [timerId, setTimerId] = useState(null);
+  const [docId, setDocId] = useState(null);
+
+  useEffect(() => {
+    if (!docId) return;
+
+    const unsub = onSnapshot(doc(db, 'generations', docId), (docSnap) => {
+      const data = docSnap.data();
+      if (data?.status === 'done') {
+        setStatus('done');
+      }
+    });
+
+    return () => unsub(); // destroy listener on unmount
+  }, [docId]);
 
   const handleCreate = async () => {
     setStatus('processing');
@@ -33,27 +53,20 @@ export default function InputScreen({ navigation }) {
 
     try {
       if (prompt.length > 0) {
-        // FOR TESTING
-        let res = await addDoc(collection(db, 'generations'), {
+        const res = await addDoc(collection(db, 'generations'), {
           prompt,
           style: selectedStyle,
           createdAt: serverTimestamp(),
+          status: 'processing', // trigger prompt processing
         });
-        console.log('saved ,', res);
+        console.log('Prompt saved:', res.id);
+        setDocId(res.id);
       } else {
-        console.log('skipped');
+        console.log('Empty prompt — skipping');
       }
     } catch (error) {
-      console.log(error);
+      console.error('Firestore error:', error);
     }
-
-    const delay =
-      /*  Math.floor(Math.random() * (60 - 30 + 1) + 30)  */ 2 * 1000; // FOR TESTING
-    const id = setTimeout(() => {
-      setStatus('done');
-    }, delay);
-
-    setTimerId(id);
   };
 
   const handleChipPress = () => {
