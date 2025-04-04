@@ -123,26 +123,34 @@ export default function InputScreen({ navigation }) {
   return (
     <LinearGradient
       colors={['#0f0c29', '#302b63', '#24243e']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
       style={styles.container}>
+      <Text style={styles.screenHeader}>AI Logo</Text>
+
       <View style={styles.header}>{renderStatusChip()}</View>
 
       <View style={styles.promptHeader}>
-        <Text style={styles.label}>Enter Your Prompt</Text>
+        <Text style={styles.labelfirst}>Enter Your Prompt</Text>
         <TouchableOpacity style={styles.surpriseBtn}>
           <Ionicons name="sparkles-outline" size={16} color="#fff" />
           <Text style={styles.surpriseText}> Surprise me</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.promptRow}>
-        <TextInput
-          style={styles.textInput}
-          multiline
-          maxLength={500}
-          value={prompt}
-          onChangeText={setPrompt}
-          placeholder="A blue lion logo reading 'HEXA' in bold letters"
-          placeholderTextColor="#ccc"
-        />
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.textInput}
+            multiline
+            maxLength={500}
+            value={prompt}
+            onChangeText={setPrompt}
+            placeholder="A blue lion logo reading 'HEXA' in bold letters"
+            placeholderTextColor="#ccc"
+            textAlignVertical="top"
+          />
+          <Text style={styles.charCount}>{prompt.length}/500</Text>
+        </View>
       </View>
 
       <Text style={styles.label}>Logo Styles</Text>
@@ -180,7 +188,9 @@ export default function InputScreen({ navigation }) {
         onPress={handleCreate}
         disabled={status === 'processing'}>
         <LinearGradient
-          colors={['#8e2de2', '#4a00e0']}
+          colors={['#4a00e0', '#8e2de2']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
           style={styles.buttonGradient}>
           <Text style={styles.buttonText}>Create ✨</Text>
         </LinearGradient>
@@ -204,17 +214,24 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 12,
   },
+  labelfirst: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+  },
   textInput: {
+    marginTop: 5,
     backgroundColor: '#1e1e2f',
     color: '#fff',
     borderRadius: 16,
     padding: 16,
-    minHeight: 120,
+    minHeight: 175,
     fontSize: 15,
     flex: 1,
+    textAlignVertical: 'top',
   },
   promptRow: {
-    marginBottom: 100, // ✅ Already good
+    marginBottom: 20,
   },
   surpriseBtn: {
     flexDirection: 'row',
@@ -225,10 +242,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   styleContainer: {
-    gap: 12,
+    gap: 6,
   },
   styleCard: {
-    width: 80,
+    width: 90,
     height: 90,
     backgroundColor: '#1e1e2f',
     borderRadius: 16,
@@ -249,13 +266,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   button: {
-    borderRadius: 20,
     overflow: 'hidden',
+    borderRadius: 50,
   },
   buttonGradient: {
     paddingVertical: 16,
     alignItems: 'center',
-    borderRadius: 20,
   },
   buttonText: {
     color: '#fff',
@@ -311,5 +327,22 @@ const styles = StyleSheet.create({
     color: '#aaa',
     fontSize: 12,
     marginTop: 2,
+  },
+  screenHeader: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  inputWrapper: {
+    minHeight: 175,
+  },
+  charCount: {
+    position: 'absolute',
+    bottom: 1,
+    left: 16,
+    color: '#888',
+    fontSize: 12,
   },
 });
