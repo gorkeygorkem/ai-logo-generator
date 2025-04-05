@@ -8,6 +8,7 @@ import {
   ScrollView,
   FlatList,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -21,15 +22,15 @@ import {
 } from 'firebase/firestore';
 
 const stylesList = [
-  { id: 'no-style', label: 'No Style', icon: 'filter-none' },
-  { id: 'monogram', label: 'Monogram', icon: 'text-fields' },
-  { id: 'abstract', label: 'Abstract', icon: 'blur-on' },
-  { id: 'mascot', label: 'Mascot', icon: 'sports-esports' },
+  { id: 'No-style', label: 'No Style', icon: 'filter-none' },
+  { id: 'Monogram', label: 'Monogram', icon: 'text-fields' },
+  { id: 'Abstract', label: 'Abstract', icon: 'blur-on' },
+  { id: 'Mascot', label: 'Mascot', icon: 'sports-esports' },
 ];
 
 export default function InputScreen({ navigation }) {
   const [prompt, setPrompt] = useState('');
-  const [selectedStyle, setSelectedStyle] = useState('no-style');
+  const [selectedStyle, setSelectedStyle] = useState('No-style');
   const [status, setStatus] = useState('idle'); // idle | processing | done
   const [timerId, setTimerId] = useState(null);
   const [docId, setDocId] = useState(null);
@@ -69,6 +70,18 @@ export default function InputScreen({ navigation }) {
     }
   };
 
+  const surprisePrompts = [
+    'A minimalist fox logo with sharp edges in orange',
+    'A futuristic AI logo with glowing elements in neon blue',
+    'A vintage bakery logo with cursive script and wheat icon',
+  ];
+
+  const handleSurprise = () => {
+    const random =
+      surprisePrompts[Math.floor(Math.random() * surprisePrompts.length)];
+    setPrompt(random);
+  };
+
   const handleChipPress = () => {
     if (status === 'done') {
       navigation.navigate('Output', {
@@ -99,23 +112,35 @@ export default function InputScreen({ navigation }) {
         onPress={handleChipPress}
         disabled={isProcessing}
         activeOpacity={isProcessing ? 1 : 0.7}>
-        <View style={styles.chipContainer}>
-          <View style={styles.chipIcon}>
+        <LinearGradient
+          colors={
+            isProcessing ? ['#1e1e2f', '#1e1e2f'] : ['#4a00e0', '#8e2de2']
+          }
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.statusChipContainer}>
+          <View style={styles.statusLeftFull}>
             {isProcessing ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Ionicons name="checkmark-circle" size={18} color="#81c784" />
+              <Image
+                source={require('../assets/mock.jpg')}
+                style={styles.statusFullImage}
+              />
             )}
           </View>
-          <View style={styles.chipTextContainer}>
+
+          <View style={styles.statusRight}>
             <Text style={styles.chipMain}>
-              {isProcessing ? 'Creating Your Design…' : 'Your Design is Ready!'}
+              {isProcessing
+                ? 'Creating Your Design...'
+                : 'Your Design is Ready!'}
             </Text>
             <Text style={styles.chipSub}>
-              {isProcessing ? 'Ready in 2 seconds' : 'Tap to see it.'}
+              {isProcessing ? 'Ready in 1 minute' : 'Tap to see it.'}
             </Text>
           </View>
-        </View>
+        </LinearGradient>
       </TouchableOpacity>
     );
   };
@@ -132,7 +157,7 @@ export default function InputScreen({ navigation }) {
 
       <View style={styles.promptHeader}>
         <Text style={styles.labelfirst}>Enter Your Prompt</Text>
-        <TouchableOpacity style={styles.surpriseBtn}>
+        <TouchableOpacity onPress={handleSurprise} style={styles.surpriseBtn}>
           <Ionicons name="sparkles-outline" size={16} color="#fff" />
           <Text style={styles.surpriseText}> Surprise me</Text>
         </TouchableOpacity>
@@ -163,14 +188,19 @@ export default function InputScreen({ navigation }) {
         renderItem={({ item }) => {
           const isSelected = selectedStyle === item.id;
           return (
-            <TouchableOpacity
-              style={[styles.styleCard, isSelected && styles.selectedStyleCard]}
-              onPress={() => setSelectedStyle(item.id)}>
-              <MaterialIcons
-                name={item.icon}
-                size={28}
-                color={isSelected ? '#fff' : '#999'}
-              />
+            <View style={styles.styleItem}>
+              <TouchableOpacity
+                style={[
+                  styles.styleCard,
+                  isSelected && styles.selectedStyleCard,
+                ]}
+                onPress={() => setSelectedStyle(item.id)}>
+                <MaterialIcons
+                  name={item.icon}
+                  size={32}
+                  color={isSelected ? '#fff' : '#999'}
+                />
+              </TouchableOpacity>
               <Text
                 style={[
                   styles.styleText,
@@ -178,7 +208,7 @@ export default function InputScreen({ navigation }) {
                 ]}>
                 {item.label}
               </Text>
-            </TouchableOpacity>
+            </View>
           );
         }}
       />
@@ -208,16 +238,25 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 24,
   },
-  label: {
+  screenHeader: {
+    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+
+  promptHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 12,
   },
-  labelfirst: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
+  promptRow: {
+    marginBottom: 20,
+  },
+  inputWrapper: {
+    minHeight: 175,
   },
   textInput: {
     marginTop: 5,
@@ -230,9 +269,15 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlignVertical: 'top',
   },
-  promptRow: {
-    marginBottom: 20,
+  charCount: {
+    position: 'absolute',
+    bottom: 5,
+    left: 16,
+    color: '#888',
+    fontWeight: '400',
+    fontSize: 11,
   },
+
   surpriseBtn: {
     flexDirection: 'row',
     alignSelf: 'flex-end',
@@ -241,23 +286,35 @@ const styles = StyleSheet.create({
     color: '#aaa',
     fontSize: 14,
   },
+
+  label: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 12,
+  },
+  labelfirst: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+  },
   styleContainer: {
     gap: 6,
   },
+  styleItem: {
+    alignItems: 'center',
+    marginRight: 12,
+  },
   styleCard: {
-    width: 90,
-    height: 90,
+    width: 80,
+    height: 80,
     backgroundColor: '#1e1e2f',
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
-  },
-  selectedStyleCard: {
-    backgroundColor: '#4a00e0',
   },
   styleText: {
-    marginTop: 8,
+    marginTop: 6,
     color: '#aaa',
     fontSize: 12,
   },
@@ -265,6 +322,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
   },
+
   button: {
     overflow: 'hidden',
     borderRadius: 50,
@@ -278,45 +336,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  statusChip: {
+
+  statusChipContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#444',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
+    height: 72,
+    borderRadius: 24,
+    overflow: 'hidden',
+    alignItems: 'stretch',
   },
-  chipDone: {
-    backgroundColor: '#2e7d32',
-  },
-  chipText: {
-    color: '#fff',
-    fontSize: 14,
-  },
-  promptHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  chipContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#2f2f3b',
-    padding: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-  chipIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#444',
-    alignItems: 'center',
+  statusLeftFull: {
+    width: 72,
+    height: '100%',
+    backgroundColor: '#00000033',
     justifyContent: 'center',
-    marginRight: 12,
+    alignItems: 'center',
   },
-  chipTextContainer: {
+  statusFullImage: {
+    width: 80,
+    height: 80,
+  },
+  statusRight: {
     flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
   },
   chipMain: {
     color: '#fff',
@@ -327,22 +369,5 @@ const styles = StyleSheet.create({
     color: '#aaa',
     fontSize: 12,
     marginTop: 2,
-  },
-  screenHeader: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  inputWrapper: {
-    minHeight: 175,
-  },
-  charCount: {
-    position: 'absolute',
-    bottom: 1,
-    left: 16,
-    color: '#888',
-    fontSize: 12,
   },
 });
