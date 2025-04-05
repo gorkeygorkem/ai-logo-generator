@@ -22,8 +22,8 @@ import {
 } from 'firebase/firestore';
 
 const stylesList = [
-  { id: 'No-style', label: 'No Style', icon: 'filter-none' },
-  { id: 'Monogram', label: 'Monogram', icon: 'text-fields' },
+  { id: 'No-style', label: 'No Style', icon: 'do-not-disturb' },
+  { id: 'Monogram', label: 'Monogram', icon: 'texture' },
   { id: 'Abstract', label: 'Abstract', icon: 'blur-on' },
   { id: 'Mascot', label: 'Mascot', icon: 'sports-esports' },
 ];
@@ -32,7 +32,7 @@ export default function InputScreen({ navigation }) {
   const [prompt, setPrompt] = useState('');
   const [selectedStyle, setSelectedStyle] = useState('No-style');
   const [status, setStatus] = useState('idle'); // idle | processing | done
-  const [timerId, setTimerId] = useState(null);
+  const [timerId, _] = useState(null);
   const [docId, setDocId] = useState(null);
 
   useEffect(() => {
@@ -56,7 +56,8 @@ export default function InputScreen({ navigation }) {
       if (prompt.length > 0) {
         const res = await addDoc(collection(db, 'generations'), {
           prompt,
-          style: selectedStyle,
+          style:
+            stylesList.find((s) => s.id === selectedStyle)?.label || 'No Style',
           createdAt: serverTimestamp(),
           status: 'processing', // trigger prompt processing
         });
@@ -86,13 +87,14 @@ export default function InputScreen({ navigation }) {
     if (status === 'done') {
       navigation.navigate('Output', {
         prompt,
-        style: selectedStyle,
+        style:
+          stylesList.find((s) => s.id === selectedStyle)?.label || 'No Style',
       });
 
       // Reset (optional)
       setStatus('idle');
       setPrompt('');
-      setSelectedStyle('no-style');
+      setSelectedStyle('No-style');
     }
   };
 
@@ -158,7 +160,7 @@ export default function InputScreen({ navigation }) {
       <View style={styles.promptHeader}>
         <Text style={styles.labelfirst}>Enter Your Prompt</Text>
         <TouchableOpacity onPress={handleSurprise} style={styles.surpriseBtn}>
-          <Ionicons name="sparkles-outline" size={16} color="#fff" />
+          <Ionicons name="dice" size={16} color="#fff" />
           <Text style={styles.surpriseText}> Surprise me</Text>
         </TouchableOpacity>
       </View>
@@ -222,7 +224,9 @@ export default function InputScreen({ navigation }) {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.buttonGradient}>
-          <Text style={styles.buttonText}>Create ✨</Text>
+          <Text style={styles.buttonText}>
+            Create <Ionicons name="sparkles-outline" size={16} color="#fff" />
+          </Text>
         </LinearGradient>
       </TouchableOpacity>
     </LinearGradient>
@@ -306,8 +310,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   styleCard: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
     backgroundColor: '#1e1e2f',
     borderRadius: 16,
     alignItems: 'center',
@@ -316,11 +320,11 @@ const styles = StyleSheet.create({
   styleText: {
     marginTop: 6,
     color: '#aaa',
-    fontSize: 12,
+    fontSize: 13,
   },
   selectedStyleText: {
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: '700',
   },
 
   button: {
@@ -333,7 +337,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
   },
 
@@ -363,11 +367,11 @@ const styles = StyleSheet.create({
   chipMain: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 16,
   },
   chipSub: {
     color: '#aaa',
-    fontSize: 12,
+    fontSize: 13,
     marginTop: 2,
   },
 });

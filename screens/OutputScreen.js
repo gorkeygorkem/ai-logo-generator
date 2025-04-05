@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '600',
     color: '#fff',
   },
@@ -97,9 +97,9 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   image: {
-    width: 320,
-    height: 320,
-    borderRadius: 24,
+    width: 342,
+    height: 342,
+    borderRadius: 16,
     backgroundColor: '#fff',
   },
   promptCard: {
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   promptLabel: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 15,
   },
   copyBtn: {
     flexDirection: 'row',
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   promptText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 16,
     marginBottom: 12,
   },
   styleChip: {
