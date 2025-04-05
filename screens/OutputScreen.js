@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Image,
   TouchableOpacity,
-  Alert,
+  Platform,
+  ToastAndroid,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,14 +22,24 @@ export default function OutputScreen() {
     style: 'Monogram',
   };
 
+  const [copied, setCopied] = useState(false);
+
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(prompt);
-    Alert.alert('Copied!', 'Prompt copied to clipboard.');
+    await Clipboard.setStringAsync(prompt);
+    setCopied(true);
+
+    if (Platform.OS === 'android') {
+      ToastAndroid.show('Copied!', ToastAndroid.SHORT);
+    }
+
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <LinearGradient
       colors={['#0f0c29', '#302b63', '#24243e']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
       style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
@@ -37,10 +49,9 @@ export default function OutputScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Logo Image */}
-      <View style={styles.imageContainer}>
+      <View style={styles.imageWrapper}>
         <Image
-          source={require('../assets/mock.jpg')} // 👈 Replace with your mock image
+          source={require('../assets/mock.jpg')}
           resizeMode="contain"
           style={styles.image}
         />
@@ -52,7 +63,7 @@ export default function OutputScreen() {
           <Text style={styles.promptLabel}>Prompt</Text>
           <TouchableOpacity onPress={handleCopy} style={styles.copyBtn}>
             <Ionicons name="copy-outline" size={16} color="#aaa" />
-            <Text style={styles.copyText}> Copy</Text>
+            <Text style={styles.copyText}>{copied ? ' Copied' : ' Copy'}</Text>
           </TouchableOpacity>
         </View>
         <Text style={styles.promptText}>{prompt}</Text>
@@ -81,21 +92,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
-  imageContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 24,
-    overflow: 'hidden',
+  imageWrapper: {
+    alignItems: 'center',
     marginBottom: 32,
-    aspectRatio: 1,
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: 320,
+    height: 320,
+    borderRadius: 24,
+    backgroundColor: '#fff',
   },
   promptCard: {
     backgroundColor: '#2f2f3b',
     borderRadius: 20,
     padding: 16,
+    opacity: 0.8,
   },
   promptHeader: {
     flexDirection: 'row',
