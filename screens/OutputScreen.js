@@ -41,34 +41,36 @@ export default function OutputScreen() {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }}
       style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Your Design</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="close" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.imageWrapper}>
-        <Image
-          source={require('../assets/mock.jpg')}
-          resizeMode="contain"
-          style={styles.image}
-        />
-      </View>
-
-      {/* Prompt Card */}
-      <View style={styles.promptCard}>
-        <View style={styles.promptHeader}>
-          <Text style={styles.promptLabel}>Prompt</Text>
-          <TouchableOpacity onPress={handleCopy} style={styles.copyBtn}>
-            <Ionicons name="copy-outline" size={16} color="#aaa" />
-            <Text style={styles.copyText}>{copied ? ' Copied' : ' Copy'}</Text>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Your Design</Text>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.promptText}>{prompt}</Text>
-        <View style={styles.styleChip}>
-          <Text style={styles.chipText}>{style}</Text>
+
+        <View style={styles.imageWrapper}>
+          <Image
+            source={require('../assets/mock.jpg')}
+            resizeMode="contain"
+            style={styles.image}
+          />
+        </View>
+
+        <View style={styles.promptCard}>
+          <View style={styles.promptHeader}>
+            <Text style={styles.promptLabel}>Prompt</Text>
+            <TouchableOpacity onPress={handleCopy} style={styles.copyBtn}>
+              <Ionicons name="copy-outline" size={16} color="#aaa" />
+              <Text style={styles.copyText}>
+                {copied ? ' Copied' : ' Copy'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.promptText}>{prompt}</Text>
+          <View style={styles.styleChip}>
+            <Text style={styles.chipText}>{style}</Text>
+          </View>
         </View>
       </View>
     </LinearGradient>
@@ -76,6 +78,11 @@ export default function OutputScreen() {
 }
 
 const styles = StyleSheet.create({
+  content: {
+    width: 350,
+    alignSelf: 'center',
+  },
+
   container: {
     flex: 1,
     padding: 24,
@@ -97,8 +104,8 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   image: {
-    width: 342,
-    height: 342,
+    width: 350,
+    height: 350,
     borderRadius: 16,
     backgroundColor: '#fff',
   },
