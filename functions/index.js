@@ -9,6 +9,13 @@ const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 initializeApp();
 const db = getFirestore();
 
+// AI implementation would come here
+/* exports.generateLogo = functions.firestore
+  .document('generations/{docId}')
+  .onCreate(async (snap, context) => {
+    // do stuff here
+    }); */
+
 exports.processPrompt = onDocumentCreated(
   'generations/{docId}',
   async (event) => {
@@ -18,7 +25,7 @@ exports.processPrompt = onDocumentCreated(
     if (data.status !== 'processing') return;
 
     const delay = Math.floor(Math.random() * (60 - 30 + 1) + 30) * 1000;
-    console.log(`⏳ Delaying generation for ${delay / 1000}s for ${docId}`);
+    console.log(` Delaying generation for ${delay / 1000}s for ${docId}`);
 
     await new Promise((resolve) => setTimeout(resolve, delay));
 
@@ -27,6 +34,6 @@ exports.processPrompt = onDocumentCreated(
       finishedAt: FieldValue.serverTimestamp(),
     });
 
-    console.log(`✅ Updated ${docId} to done`);
+    console.log(`Updated ${docId} to done`);
   },
 );
