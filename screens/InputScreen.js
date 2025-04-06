@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#fff',
-    marginBottom: 12,
+    marginVertical: 12,
   },
   labelfirst: {
     fontSize: 18,
