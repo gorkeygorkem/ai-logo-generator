@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
   FlatList,
   ActivityIndicator,
   Image,
@@ -31,7 +30,7 @@ const stylesList = [
 export default function InputScreen({ navigation }) {
   const [prompt, setPrompt] = useState('');
   const [selectedStyle, setSelectedStyle] = useState('No-style');
-  const [status, setStatus] = useState('idle'); // idle | processing | done
+  const [status, setStatus] = useState('idle'); // idle | processing | error | done
   const [timerId, _] = useState(null);
   const [docId, setDocId] = useState(null);
 
@@ -49,25 +48,27 @@ export default function InputScreen({ navigation }) {
   }, [docId]);
 
   const handleCreate = async () => {
+    if (!prompt.trim()) {
+      setStatus('error');
+      return;
+    }
+
     setStatus('processing');
-    console.log('📤 Attempting to write to Firestore...');
+    console.log('Attempting to write to Firestore...');
 
     try {
-      if (prompt.length > 0) {
-        const res = await addDoc(collection(db, 'generations'), {
-          prompt,
-          style:
-            stylesList.find((s) => s.id === selectedStyle)?.label || 'No Style',
-          createdAt: serverTimestamp(),
-          status: 'processing', // trigger prompt processing
-        });
-        console.log('Prompt saved:', res.id);
-        setDocId(res.id);
-      } else {
-        console.log('Empty prompt — skipping');
-      }
+      const res = await addDoc(collection(db, 'generations'), {
+        prompt,
+        style:
+          stylesList.find((s) => s.id === selectedStyle)?.label || 'No Style',
+        createdAt: serverTimestamp(),
+        status: 'processing',
+      });
+      console.log('Prompt saved:', res.id);
+      setDocId(res.id);
     } catch (error) {
       console.error('Firestore error:', error);
+      setStatus('error'); // fallback to error
     }
   };
 
@@ -108,39 +109,56 @@ export default function InputScreen({ navigation }) {
     if (status === 'idle') return null;
 
     const isProcessing = status === 'processing';
+    const isError = status === 'error';
+
+    const chipColors = isError
+      ? ['#dc3545', '#dc3545']
+      : isProcessing
+      ? ['#1e1e2f', '#1e1e2f']
+      : ['#4a00e0', '#8e2de2'];
+
+    const chipMainText = isError
+      ? 'Oops, something went wrong!'
+      : isProcessing
+      ? 'Creating Your Design...'
+      : 'Your Design is Ready!';
+
+    const chipSubText = isError
+      ? 'Click to try again.'
+      : isProcessing
+      ? 'Ready in 1 minute'
+      : 'Tap to see it.';
+
+    const chipIcon = isError ? (
+      <MaterialIcons name="error-outline" size={28} color="#fff" />
+    ) : isProcessing ? (
+      <ActivityIndicator size="small" color="#fff" />
+    ) : (
+      <Image
+        source={require('../assets/mock.jpg')}
+        style={styles.statusFullImage}
+      />
+    );
 
     return (
       <TouchableOpacity
-        onPress={handleChipPress}
-        disabled={isProcessing}
+        onPress={() => {
+          if (isError) {
+            setStatus('idle');
+          } else if (!isProcessing) {
+            handleChipPress();
+          }
+        }}
         activeOpacity={isProcessing ? 1 : 0.7}>
         <LinearGradient
-          colors={
-            isProcessing ? ['#1e1e2f', '#1e1e2f'] : ['#4a00e0', '#8e2de2']
-          }
+          colors={chipColors}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.statusChipContainer}>
-          <View style={styles.statusLeftFull}>
-            {isProcessing ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Image
-                source={require('../assets/mock.jpg')}
-                style={styles.statusFullImage}
-              />
-            )}
-          </View>
-
+          <View style={styles.statusLeftFull}>{chipIcon}</View>
           <View style={styles.statusRight}>
-            <Text style={styles.chipMain}>
-              {isProcessing
-                ? 'Creating Your Design...'
-                : 'Your Design is Ready!'}
-            </Text>
-            <Text style={styles.chipSub}>
-              {isProcessing ? 'Ready in 1 minute' : 'Tap to see it.'}
-            </Text>
+            <Text style={styles.chipMain}>{chipMainText}</Text>
+            <Text style={styles.chipSub}>{chipSubText}</Text>
           </View>
         </LinearGradient>
       </TouchableOpacity>
@@ -349,7 +367,7 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
   },
   statusLeftFull: {
-    width: 72,
+    width: 70,
     height: '100%',
     backgroundColor: '#00000033',
     justifyContent: 'center',
